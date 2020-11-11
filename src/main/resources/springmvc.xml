@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        ">
+
+
+    <!--开启注解功能-->
+    <mvc:annotation-driven/>
+    <!--加载静态资源-->
+    <mvc:default-servlet-handler/>
+
+    <!--
+            bean的生成和维护，目前都放在这个springmvc容器中
+     -->
+    <!-- 注解生成控制器的bean -->
+    <context:component-scan base-package="com.system.controller"/>
+    <!-- 注解service的bean -->
+    <context:component-scan base-package="com.system.service"/>
+
+    <!--
+          dao的bean的生成：
+          SqlSessionFactory->sqlSession->sqlSession.getMapper()
+     -->
+
+    <!-- 引入jdbc.properties -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 数据源bean -->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--
+        public class SqlSessionFactoryBean
+                implements FactoryBean<SqlSessionFactory>
+
+        configLocation  ：引入myabtis配置文件
+        typeAliasesPackage :别名
+        mapperLocations ：引入mapper文件
+        plugins :mybatis插件
+     -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- <property name="configLocation" ></property>  -->
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="com.system.model"/>
+        <property name="mapperLocations" value="classpath:mappers/*.xml"/>
+        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <!--使用下面的方式配置参数，一行配置一个 -->
+                        <value>
+                            helperDialect=mysql
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+
+    </bean>
+    <!--
+    <bean id="deptDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+        <property name="mapperInterface" value="com.aowin.dao.DeptDao"></property>
+    </bean>
+    <bean id="empDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+           <property name="mapperInterface" value="com.aowin.dao.EmpDao"></property>
+    </bean> -->
+    <!--
+        生成所有Mapper的bean
+        dao的bean默认的名字：类名，首字母小写  deptDao   empDao
+     -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <property name="basePackage" value="com.system.mappers"/>
+    </bean>
+
+
+
+
+    <!--
+        事务处理 ：aop
+        环绕通知  ：只需要添加到增删改方法上（pointcut）
+        advisor
+
+        声明式事务处理：不需要自己通过代码实现
+        transactionAttributes :事务传播行为
+     -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 事务处理的注解驱动 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+</beans>
+
+
+
+
+
+

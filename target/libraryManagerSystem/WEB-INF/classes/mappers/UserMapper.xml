@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.system.mappers.UserMapper">
+
+    <select id="loginPage" resultType="com.system.model.User">
+        select * from user where username = #{username} and password = #{password}
+    </select>
+
+
+    <select id="getAllUsers" resultType="com.system.model.User">
+        select * from user
+        <where>
+            <if test="userid != null and userid != ''">
+                and userid like concat(%,#{userid},'%')
+            </if>
+            <if test="username != null and username != ''">
+                and username like concat('%',#{username},'%')
+            </if>
+            <if test="startTime != null">
+                and createtime >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                and #{endTime} >= createtime
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <delete id="delUser" >
+        delete from user where userid = #{userid}
+    </delete>
+
+    <insert id="addUser">
+        insert into user (username,password,idcard,phone,createtime,status,owingmoney) values(#{username},#{password},#{idcard},#{phone},#{createtime},#{status},#{owingmoney})
+    </insert>
+
+    <select id="checkUserName" resultType="com.system.model.User">
+        select * from user where username = #{username}
+    </select>
+
+    <update id="updateUser" >
+        update user set password=#{password},idcard=#{idcard},phone=#{phone},status=#{status} where username = #{username}
+    </update>
+
+    <update id="paymoney">
+        update user set owingmoney=0.0 where username = #{username}
+    </update>
+
+</mapper>

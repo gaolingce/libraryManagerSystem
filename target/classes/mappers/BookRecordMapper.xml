@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.system.mappers.BookRecordMapper">
+    <insert id="addRecord">
+       INSERT into bookrecord(username,bookcode,lendtime,expiretime) VALUES(#{username},#{bookcode},#{lendtime},#{expiretime})
+    </insert>
+
+    <update id="backBook" >
+        update bookrecord set  returntime = #{returntime} where bookcode = #{bookcode} and username = #{username}
+    </update>
+
+    <select id="getUserBooks" resultType="com.system.model.ShowUserBooks">
+        select book.bookcode bookcode,book.bookname bookname,bookrecord.lendtime lendtime,bookrecord.expiretime from book,bookrecord where book.bookcode = bookrecord.bookcode and username = #{username} and book.status=-1 and bookrecord.returntime is NULL
+    </select>
+
+    <update id="shouldPayMoney">
+        update user set owingmoney=owingmoney + #{owingmoney} where username = #{username}
+    </update>
+
+</mapper>

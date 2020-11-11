@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.system.mappers.BookMapper">
+
+    <select id="getAllBooks" resultType="com.system.model.Book">
+        select * from book
+        <where>
+            <if test="bookcode != null and bookcode!=''">
+                and bookcode like concat('%',#{bookcode},'%')
+            </if>
+            <if test="bookname != null and bookname !=''">
+                and bookname like concat('%',#{bookname},'%')
+            </if>
+            <if test="status != null and status !='' ">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="addBook" >
+        insert into book(bookname, author, price, publisher, status, bookcode) values(#{bookname},#{author},#{price},#{publisher},#{status},#{bookcode})
+    </insert>
+
+    <select id="checkBookCode" resultType="com.system.model.Book">
+        select * from book whenever bookcode = #{bookcode}
+    </select>
+
+    <delete id="delBook">
+        delete from book where bookcode = #{bookcode}
+    </delete>
+
+    <update id="updateBook">
+        update book set bookname=#{bookname},author=#{author},price=#{price},publisher=#{publisher},status=#{status}
+    </update>
+
+    <update id="borrowBook" >
+        update book set status = #{status} where bookcode = #{bookcode}
+    </update>
+
+</mapper>
